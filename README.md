@@ -1,76 +1,48 @@
-# RetailPulse – End-to-End Retail Data Engineering & Lakehouse Analytics Platform
+# RetailPulse Lakehouse Platform
 
-RetailPulse is an enterprise-grade lakehouse analytics platform built on **Databricks**, **Delta Lake**, **PySpark**, and **Unity Catalog**. It seamlessly processes historical batch transactions and live streaming order events using the **Medallion Architecture (Bronze -> Silver -> Gold)**.
-
----
-
-## 🏗️ High-Level System Architecture
-
-```mermaid
-flowchart LR
-    subgraph Sources["Sources"]
-        Batch["Historical Batch Data<br/>(Customers, Products, Orders)"]
-        Stream["Real-Time Order Events<br/>(JSON Payloads)"]
-    end
-
-    subgraph Ingestion["Ingestion"]
-        CI["COPY INTO"]
-        AL["Auto Loader (cloudFiles)"]
-    end
-
-    subgraph Medallion["Delta Lake Medallion"]
-        B[("Bronze Layer<br/>Raw Data")]
-        S[("Silver Layer<br/>Cleaned & Deduplicated")]
-        G[("Gold Layer<br/>Star Schema & KPIs")]
-        Q[("Quarantine Zone<br/>Data Quality Failures")]
-    end
-
-    subgraph Consumption["Consumption"]
-        SQL["Databricks SQL"]
-        Dash["Executive Dashboard"]
-    end
-
-    Batch --> CI --> B
-    Stream --> AL --> B
-    B --> S
-    S -. Bad Records .-> Q
-    S --> G
-    G --> SQL --> Dash
-```
+An end-to-end retail data engineering project built on Databricks using PySpark, Delta Lake, and the Medallion Architecture (Bronze -> Silver -> Gold).
 
 ---
 
-## 📁 Repository Structure
-
-```text
-RetailPulse-Lakehouse-Platform/
-├── README.md                          # Project documentation
-├── .gitignore                         # Standard git ignore rules
-├── docs/                              # Architecture diagrams and data dictionary
-│   ├── architecture/
-│   └── data_dictionary/
-├── notebooks/                         # Databricks PySpark & SQL notebooks
-│   ├── 01_bronze/                     # Raw ingestion notebooks
-│   ├── 02_silver/                     # Data cleaning, deduplication & quarantine
-│   ├── 03_gold/                       # Dimensional modeling (Star Schema) & KPIs
-│   ├── 04_streaming/                  # Auto Loader streaming pipelines
-│   └── 05_orchestration/             # Databricks Workflows configuration
-├── src/                               # Reusable Python scripts
-│   ├── generators/                    # Synthetic data generation scripts
-│   └── utils/                         # Logging, quality checks & helpers
-├── sql/                               # Databricks SQL scripts & DDLs
-│   ├── ddl/
-│   └── analytics/
-└── tests/                             # Data quality & pipeline validation tests
-```
+## Tech Stack
+- **Platform:** Databricks
+- **Processing:** PySpark
+- **Storage:** Delta Lake
+- **SQL & Analytics:** Databricks SQL
+- **Orchestration:** Databricks Workflows
 
 ---
 
-## 🎯 Tech Stack
-- **Compute & Platform:** Databricks Workspace (Free Edition / Serverless)
-- **Data Governance:** Unity Catalog (Catalogs, Schemas, Volumes)
-- **Data Lake Format:** Delta Lake (ACID, Time Travel, Schema Enforcement)
-- **Processing Engine:** Apache Spark / PySpark
-- **Ingestion Mechanisms:** COPY INTO & Auto Loader (`cloudFiles`)
-- **Orchestration:** Databricks Workflows (Multi-task DAGs)
-- **Analytics & BI:** Databricks SQL & Native Lakehouse Dashboards
+## Pipeline Workflow
+
+1. **Bronze Layer (Raw Ingestion):**
+   - Batch ingestion of Customers, Products, and Orders CSV data using `COPY INTO`.
+   - Streaming ingestion of real-time JSON order events using Databricks `Auto Loader` (`cloudFiles`).
+
+2. **Silver Layer (Cleaned & Curated):**
+   - Deduplication using PySpark `row_number()` window ranking.
+   - Quality checks: Invalid records (negative prices, missing customer IDs) routed to `quarantine_orders_dlq`.
+   - Idempotent upserts into Delta tables using `MERGE INTO`.
+
+3. **Gold Layer (Analytics):**
+   - Star Schema dimensional modeling (`dim_customers`, `dim_products`, `fact_sales_orders`).
+   - Pre-aggregated tables for daily sales performance and customer lifetime value (LTV).
+
+---
+
+## How to Run
+
+1. **Generate sample data:**
+   ```bash
+   python3 src/generators/generate_retail_data.py
+   ```
+
+2. **Run tests:**
+   ```bash
+   python3 -m unittest discover tests
+   ```
+
+3. **Check pipeline metrics:**
+   ```bash
+   python3 src/utils/benchmark_metrics.py
+   ```
