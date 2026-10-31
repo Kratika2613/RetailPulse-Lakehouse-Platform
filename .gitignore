@@ -1,0 +1,26 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Mac OS metadata
+.DS_Store
+
+# Environments & virtualenvs
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Databricks CLI and auth caches
+.databricks/
+
+# Local raw test data output (don't commit massive synthetic data to Git)
+data/raw/
+data/processed/
+
+# IDE configs
+.idea/
+.vscode/
+*.swp
